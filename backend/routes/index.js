@@ -21,4 +21,14 @@ router.get('/subjects', auth(['teacher', 'student', 'cr']), subjectController.ge
 router.post('/attendance', auth(['teacher', 'cr']), attendanceController.markAttendance);
 router.get('/attendance/analytics', auth(['teacher', 'student']), attendanceController.getAttendanceAnalytics);
 
+// GET /students
+router.get('/students',auth(['teacher']), async (req, res) => {
+    try {
+      const students = await Student.find({});
+      res.json(students);
+    } catch (error) {
+      res.status(500).json({ error: 'Error fetching students' });
+    }
+  });
+  
 module.exports = router;

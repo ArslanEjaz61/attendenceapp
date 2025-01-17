@@ -14,6 +14,7 @@ const TeacherDashboard = () => {
 
   useEffect(() => {
     fetchSubjects();
+    fetchAllStudents();
   }, []);
 
   const fetchSubjects = async () => {
@@ -25,21 +26,13 @@ const TeacherDashboard = () => {
     }
   };
 
-  const fetchLowAttendanceStudents = async (subjectId) => {
+  const fetchAllStudents = async () => {
     try {
-      const response = await axios.get('/students/low-attendance', {
-        params: { subjectId }
-      });
+      const response = await axios.get('/students');
       setStudents(response.data);
     } catch (error) {
-      console.error('Error fetching students:', error);
+      console.error('Error fetching all students:', error);
     }
-  };
-
-  const handleSubjectSelect = (subject) => {
-    setSelectedSubject(subject);
-    fetchLowAttendanceStudents(subject._id);
-    setMenuVisible(false);
   };
 
   const filteredStudents = students.filter(student =>
@@ -69,48 +62,44 @@ const TeacherDashboard = () => {
           {subjects.map((subject) => (
             <Menu.Item
               key={subject._id}
-              onPress={() => handleSubjectSelect(subject)}
+              onPress={() => setSelectedSubject(subject)}
               title={subject.name}
             />
           ))}
         </Menu>
       </View>
 
-      {selectedSubject && (
-        <>
-          <Searchbar
-            placeholder="Search students"
-            onChangeText={setSearchQuery}
-            value={searchQuery}
-            style={styles.searchbar}
-          />
+      <Searchbar
+        placeholder="Search students"
+        onChangeText={setSearchQuery}
+        value={searchQuery}
+        style={styles.searchbar}
+      />
 
-          <Card style={styles.card}>
-            <Card.Content>
-              <Title>Students with Low Attendance</Title>
-              <DataTable>
-                <DataTable.Header>
-                  <DataTable.Title>Name</DataTable.Title>
-                  <DataTable.Title>ID</DataTable.Title>
-                  <DataTable.Title numeric>Attendance</DataTable.Title>
-                </DataTable.Header>
+      <Card style={styles.card}>
+        <Card.Content>
+          <Title>All Students</Title>
+          <DataTable>
+            <DataTable.Header>
+              <DataTable.Title>Name</DataTable.Title>
+              <DataTable.Title>ID</DataTable.Title>
+              <DataTable.Title numeric>Attendance</DataTable.Title>
+            </DataTable.Header>
 
-                {filteredStudents.map((student) => (
-                  <DataTable.Row key={student._id}>
-                    <DataTable.Cell>{student.name}</DataTable.Cell>
-                    <DataTable.Cell>{student.studentId}</DataTable.Cell>
-                    <DataTable.Cell numeric>
-                      <Text style={{ color: 'red' }}>
-                        {student.attendancePercentage.toFixed(1)}%
-                      </Text>
-                    </DataTable.Cell>
-                  </DataTable.Row>
-                ))}
-              </DataTable>
-            </Card.Content>
-          </Card>
-        </>
-      )}
+            {filteredStudents.map((student) => (
+              <DataTable.Row key={student._id}>
+                <DataTable.Cell>{student.name}</DataTable.Cell>
+                <DataTable.Cell>{student.studentId}</DataTable.Cell>
+                <DataTable.Cell numeric>
+                  {student.attendancePercentage
+                    ? `${student.attendancePercentage.toFixed(1)}%`
+                    : 'N/A'}
+                </DataTable.Cell>
+              </DataTable.Row>
+            ))}
+          </DataTable>
+        </Card.Content>
+      </Card>
     </ScrollView>
   );
 };
